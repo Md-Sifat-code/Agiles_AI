@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { FiSend, FiLoader } from "react-icons/fi";
 import { Link } from "react-router-dom";
 
+// Define the type for the API response
 interface ApiResponse {
-  response: string;
+  generated_text: string;
 }
 
 const Home: React.FC = () => {
@@ -24,18 +25,33 @@ const Home: React.FC = () => {
 
     setLoading(true); // Set loading to true while fetching
     setSubmittedInput(userInput); // Store user input for display after submission
+
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_Base_URL}/ai/prompt?input=${encodeURIComponent(
-          userInput
-        )}`
-      );
-      const data: ApiResponse = await response.json();
-      setApiResponse(data.response); // Set the API response
+      // Construct the URL with the message as a query parameter
+      const url = `https://spring-ai-chatbot.onrender.com/huggingface/ask?message=${encodeURIComponent(
+        userInput
+      )}`;
+
+      const response = await fetch(url, {
+        method: "POST", // POST method
+        headers: {
+          "Content-Type": "application/json", // Content-Type for POST requests
+        },
+      });
+
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`Failed to fetch. Status: ${response.status}`);
+      }
+
+      // Parse the JSON response
+      const data: ApiResponse[] = await response.json(); // Expecting an array with an object containing "generated_text"
+      setApiResponse(data[0].generated_text); // Set the "generated_text" from the response
     } catch (error) {
       console.error("Error fetching response:", error);
+      setApiResponse("An error occurred while fetching the response.");
     } finally {
-      setLoading(false); // Set loading to false when done
+      setLoading(false); // Set loading to false once the request is finished
     }
   };
 
@@ -54,24 +70,29 @@ const Home: React.FC = () => {
           </h1>
           <div className="space-y-4">
             {/* Display submitted input after submit */}
-            <div className="flex justify-start items-center p-4 rounded-lg shadow-md">
-              <p className="text-blue-800 text-sm">{submittedInput}</p>{" "}
-              {/* Show after submission */}
-            </div>
+
             {/* Display API response */}
             <div className="flex justify-end items-center p-4 rounded-lg shadow-md">
-              <p className="text-green-800 text-sm">{apiResponse}</p>
+              <p className="text-gray-200 bg-[#210633] py-3 border px-6 rounded-lg text-sm">
+                {submittedInput}
+              </p>
+            </div>
+            <div className="flex justify-start items-center p-4 rounded-lg shadow-md">
+              <p className="text-black bg-purple-100 py-3 border px-6 rounded-lg text-sm">
+                {apiResponse}
+              </p>
+              {/* Show API response here */}
             </div>
           </div>
         </div>
 
-        <div className="flex border-1 border-gray-500 rounded-xl items-center p-8 space-x-4 mt-4">
+        <div className="flex rounded-xl items-center p-8 space-x-4 mt-4">
           <input
             type="text"
             value={userInput} // Bind value to userInput state
             onChange={handleInputChange} // Update userInput as user types
             placeholder="Ask something..."
-            className="w-full text-white p-4 rounded-xl placeholder:text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
+            className="w-full text-white p-4 rounded-xl border-1 border-purple-700 placeholder:text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
           />
           <button
             onClick={handleSubmit} // Submit handler
@@ -91,7 +112,7 @@ const Home: React.FC = () => {
         </div>
 
         <div className="flex mt-1 flex-row justify-between">
-          <h1 className="text-white ma text-lg">
+          <h1 className="text-white ma text-sm">
             Agiles_AI can make mistakes. Collect important info.
           </h1>
           <p className="text-purple-700 cursor-pointer" onClick={openModal}>
@@ -108,11 +129,11 @@ const Home: React.FC = () => {
               Developer Info
             </h2>
             <p className="text-center ma text-2xl mb-4">
-              <Link to={""} className=" underline px-2">
+              <Link to={""} className="underline px-2">
                 Sifat
               </Link>{" "}
               (Frontend) &{" "}
-              <Link to={""} className=" underline px-2">
+              <Link to={""} className="underline px-2">
                 Sajid
               </Link>
               (Backend)
