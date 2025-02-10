@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+.bg_color{
+    background-color: #08020e;
+}
+.fo {
+    font-family: "Fontdiner Swanky", serif;
+  }
+  .ma {
+    font-family: "Markazi Text", serif;
+  }
+  @keyframes rotateImage {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .rotate {
+    animation: rotateImage 8s infinite linear; /* Adjust the duration and speed */
+  }
+  
