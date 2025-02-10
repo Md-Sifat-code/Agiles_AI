@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "site": "ai-agiles-service",
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
