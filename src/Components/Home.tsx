@@ -3,17 +3,13 @@ import { FiSend, FiLoader } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import logo from "/rb_20414.png";
 
-// Define the type for the API response
-interface ApiResponse {
-  generated_text: string;
-}
-
 const Home: React.FC = () => {
   const [userInput, setUserInput] = useState<string>(""); // State for user input
   const [apiResponse, setApiResponse] = useState<string>(""); // State for API response
   const [loading, setLoading] = useState<boolean>(false); // Loading state
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false); // Modal state
   const [submittedInput, setSubmittedInput] = useState<string>(""); // State to store input after submission
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false); // State to track if form is submitted
 
   // Handle input change event
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,6 +22,8 @@ const Home: React.FC = () => {
 
     setLoading(true); // Set loading to true while fetching
     setSubmittedInput(userInput); // Store user input for display after submission
+    setIsSubmitted(true); // Set form as submitted
+    setApiResponse(""); // Clear previous response when new request is submitted
 
     try {
       // Construct the URL with the new "question" parameter
@@ -65,68 +63,90 @@ const Home: React.FC = () => {
   const closeModal = () => setIsModalOpen(false);
 
   return (
-    <div className="flex flex-col justify-center items-center py-10 bg-[#292a2d] min-h-screen">
-      <div className="w-full max-w-3xl bg-transparent  p-6">
+    <div className="flex flex-col justify-center items-center  bg_color min-h-screen">
+      <div
+        className={`w-full flex flex-col min-h-screen justify-${
+          isSubmitted ? "between" : "center"
+        } border-2  max-w-3xl bg-transparent `}
+      >
+        {/* main div */}
         <div className="space-y-6">
-          <div className="flex flex-row justify-center items-center">
+          {/* scroll div */}
+          <div className={`flex flex-row justify-center items-center`}>
             <img className="w-[50px]" src={logo} alt="" />
-            <h1 className="text-center text-purple-800 text-3xl">
+            <h1 className="text-center text-white text-3xl font-bold">
               Hi I'm Agiles_AI
             </h1>
           </div>
           <h1 className="text-white mt-[-23px] text-center text-sm">
-            How can i help you today?
+            How can I help you today?
           </h1>
           <div className="space-y-4">
-            {/* Display submitted input after submit */}
+            {/* Display submitted input after submit (only after user clicks submit) */}
+            {isSubmitted && (
+              <div className="flex justify-end items-center p-4">
+                <p className="text-gray-200 bg-[#210633] shadow-sm shadow-purple-200 py-3 border px-6 rounded-lg text-lg">
+                  {submittedInput}
+                </p>
+              </div>
+            )}
 
-            {/* Display API response */}
-            <div className="flex justify-end items-center p-4 ">
-              <p className="text-gray-200 bg-[#210633] py-3 border px-6 rounded-lg text-lg">
-                {submittedInput}
-              </p>
-            </div>
-            <div className="flex justify-start items-center p-4">
-              <p className="text-black bg-purple-100 py-3 border px-6 rounded-lg text-lg">
-                {apiResponse}
-              </p>
-              {/* Show API response here */}
-            </div>
+            {/* Display "Thinking..." while waiting for API response */}
+            {isSubmitted && loading && (
+              <div className="flex justify-start items-center p-4">
+                <p className="text-white text-lg">Thinking...</p>
+              </div>
+            )}
+
+            {/* Display API response after submit (only after user clicks submit) */}
+            {isSubmitted && !loading && apiResponse && (
+              <div className="flex flex-col justify-start items-start p-4">
+                <img className="w-[50px] ml-[-10px]" src={logo} alt="" />
+                <p className="text-white flex py-3 justify-start items-start border border-purple-700 shadow-sm shadow-purple-200 px-2 rounded-lg text-lg">
+                  {apiResponse}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex mt-36 rounded-xl items-center p-8 space-x-4">
-          <input
-            type="text"
-            value={userInput} // Bind value to userInput state
-            onChange={handleInputChange} // Update userInput as user types
-            placeholder="Ask something..."
-            className="w-full text-white p-4 rounded-xl border-1 border-purple-700 placeholder:text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
-          />
-          <button
-            onClick={handleSubmit} // Submit handler
-            disabled={loading} // Disable while loading
-            className={`flex items-center cursor-pointer justify-center px-4 py-4 rounded-xl text-white font-semibold transition duration-300 ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg_color hover:bg-blue-700"
-            }`}
-          >
-            {loading ? (
-              <FiLoader className="animate-spin text-purple-700" size={24} />
-            ) : (
-              <FiSend className="text-purple-700" size={24} />
-            )}
-          </button>
-        </div>
+        <div>
+          <div className="flex relative mt-36 rounded-xl items-center p-8 space-x-4">
+            <input
+              type="text"
+              value={userInput} // Bind value to userInput state
+              onChange={handleInputChange} // Update userInput as user types
+              placeholder="Ask something..."
+              className="w-full relative text-white p-8 rounded-4xl border-3 border-purple-700 placeholder:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-300"
+            />
+            <button
+              onClick={handleSubmit} // Submit handler
+              disabled={loading} // Disable while loading
+              className={`flex items-center absolute right-13 cursor-pointer justify-center  px-4 py-4 rounded-xl text-white font-semibold transition duration-300 ${
+                loading
+                  ? "bg-transparent cursor-not-allowed"
+                  : "bg_color hover:bg-blue-700"
+              }`}
+            >
+              {loading ? (
+                <FiLoader className="animate-spin text-purple-700" size={24} />
+              ) : (
+                <FiSend className="text-purple-700 " size={24} />
+              )}
+            </button>
+          </div>
 
-        <div className="flex mt-1 flex-row justify-between">
-          <h1 className="text-white ma text-sm">
-            Agiles_AI can make mistakes. Collect important info.
-          </h1>
-          <p className="text-purple-700 cursor-pointer" onClick={openModal}>
-            Developers Info
-          </p>
+          <div className="flex px-9 max-w-3xl  mt-1 flex-row justify-between">
+            <h1 className="text-white ma text-sm">
+              Agiles_AI can make mistakes. Collect important info.
+            </h1>
+            <p
+              className="text-purple-700 cursor-pointer px-2"
+              onClick={openModal}
+            >
+              Developers Info
+            </p>
+          </div>
         </div>
       </div>
 
