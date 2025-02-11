@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FiSend, FiLoader } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import logo from "/rb_20414.png";
 
 // Define the type for the API response
 interface ApiResponse {
@@ -27,15 +28,15 @@ const Home: React.FC = () => {
     setSubmittedInput(userInput); // Store user input for display after submission
 
     try {
-      // Construct the URL with the message as a query parameter
-      const url = `https://spring-ai-chatbot.onrender.com/huggingface/ask?message=${encodeURIComponent(
+      // Construct the URL with the new "question" parameter
+      const url = `https://spring-ai-chatbot.onrender.com/ask?question=${encodeURIComponent(
         userInput
       )}`;
 
       const response = await fetch(url, {
-        method: "POST", // POST method
+        method: "GET", // Changed to GET method
         headers: {
-          "Content-Type": "application/json", // Content-Type for POST requests
+          "Content-Type": "application/json", // Content-Type for GET requests (optional here)
         },
       });
 
@@ -44,9 +45,11 @@ const Home: React.FC = () => {
         throw new Error(`Failed to fetch. Status: ${response.status}`);
       }
 
-      // Parse the JSON response
-      const data: ApiResponse[] = await response.json(); // Expecting an array with an object containing "generated_text"
-      setApiResponse(data[0].generated_text); // Set the "generated_text" from the response
+      // Get the text response directly
+      const textResponse = await response.text();
+
+      // Set the plain text response directly
+      setApiResponse(textResponse);
     } catch (error) {
       console.error("Error fetching response:", error);
       setApiResponse("An error occurred while fetching the response.");
@@ -62,23 +65,29 @@ const Home: React.FC = () => {
   const closeModal = () => setIsModalOpen(false);
 
   return (
-    <div className="flex flex-col justify-center items-center py-10 bg_color min-h-screen">
-      <div className="w-full max-w-3xl bg-transparent backdrop-blur-sm shadow-xl rounded-xl p-6">
+    <div className="flex flex-col justify-center items-center py-10 bg-[#292a2d] min-h-screen">
+      <div className="w-full max-w-3xl bg-transparent  p-6">
         <div className="space-y-6">
-          <h1 className="text-white text-center text-2xl">
-            What can I help with?
+          <div className="flex flex-row justify-center items-center">
+            <img className="w-[50px]" src={logo} alt="" />
+            <h1 className="text-center text-purple-800 text-3xl">
+              Hi I'm Agiles_AI
+            </h1>
+          </div>
+          <h1 className="text-white mt-[-23px] text-center text-sm">
+            How can i help you today?
           </h1>
           <div className="space-y-4">
             {/* Display submitted input after submit */}
 
             {/* Display API response */}
-            <div className="flex justify-end items-center p-4 rounded-lg shadow-md">
-              <p className="text-gray-200 bg-[#210633] py-3 border px-6 rounded-lg text-sm">
+            <div className="flex justify-end items-center p-4 ">
+              <p className="text-gray-200 bg-[#210633] py-3 border px-6 rounded-lg text-lg">
                 {submittedInput}
               </p>
             </div>
-            <div className="flex justify-start items-center p-4 rounded-lg shadow-md">
-              <p className="text-black bg-purple-100 py-3 border px-6 rounded-lg text-sm">
+            <div className="flex justify-start items-center p-4">
+              <p className="text-black bg-purple-100 py-3 border px-6 rounded-lg text-lg">
                 {apiResponse}
               </p>
               {/* Show API response here */}
@@ -86,7 +95,7 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex rounded-xl items-center p-8 space-x-4 mt-4">
+        <div className="flex mt-36 rounded-xl items-center p-8 space-x-4">
           <input
             type="text"
             value={userInput} // Bind value to userInput state
